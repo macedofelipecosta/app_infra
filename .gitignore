@@ -1,0 +1,32 @@
+# Ignorar archivos de estado de Terraform
+*.tfstate
+*.tfstate.backup
+
+# Ignorar el directorio .terraform (proveedores, plugins, etc.)
+.terraform/
+
+# Lock file (podés versionarlo si querés tener control de versiones de providers)
+.terraform.lock.hcl
+
+# Variables sensibles (como claves o secrets)
+*.tfvars
+
+# Archivos de salida de planes de ejecución
+*.tfplan
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de logs y temporales
+*.log
+*.tmp
+
+# Archivos swap y de backup de editores
+*~
+*.swp
+*.bak
+
+# Ignorar archivo de salida de tree si lo usaste
+estructura.txt
+
