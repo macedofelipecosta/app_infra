@@ -8,7 +8,9 @@ module "network" {
 }
 
 module "security_groups" {
-  source      = "../../modules/security-groups"
+
+  source      = "../../modules/security"
+
   vpc_id      = module.network.vpc_id
   environment = var.environment
   app_port    = var.app_port
@@ -20,23 +22,31 @@ module "alb" {
   subnet_ids         = module.network.public_subnet_ids
   security_group_ids = [module.security_groups.alb_sg_id]
   environment        = var.environment
+
   target_port        = var.app_port
+
 }
 
 module "ecs_fargate" {
   source             = "../../modules/ecs_fargate"
-  environment        = var.environment
-  service_name       = "ecs_fargate_voting_app"
-  image_url          = var.vote_image_url
+  cluster_name       = var.cluster_name
+  task_family        = var.task_family
+  container_name     = var.container_name
   container_port     = var.app_port
-  desired_count      = 1
-  subnet_ids         = module.network.private_subnet_ids
+  image              = var.vote_image_url
   cpu                = "256"
   memory             = "512"
+  desired_count      = 1
+  subnet_ids         = module.network.private_subnet_ids
   security_group_ids = [module.security_groups.ecs_sg_id]
-  target_group_arn   = module.alb.target_group_arn
-  vpc_id             = module.network.vpc_id
-  aws_region         = var.aws_region
-
+  assign_public_ip   = true
+  region             = var.aws_region
+  execution_role_arn = var.execution_role_arn
+  task_role_arn      = var.task_role_arn
+  target_group_arn   = module.alb.target_group_arn_vote
+  tags = {
+    Environment = var.environment
+  }
 }
+
 
