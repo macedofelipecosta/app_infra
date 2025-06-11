@@ -8,7 +8,9 @@ module "network" {
 }
 
 module "security_groups" {
+
   source      = "../../modules/security"
+
   vpc_id      = module.network.vpc_id
   environment = var.environment
   app_port    = var.app_port
@@ -20,6 +22,8 @@ module "alb" {
   subnet_ids         = module.network.public_subnet_ids
   security_group_ids = [module.security_groups.alb_sg_id]
   environment        = var.environment
+
+  target_port        = var.app_port
 
 }
 
