@@ -25,7 +25,7 @@ module "alb" {
 
 
 }
-module "iam_roles" {
+module "iam" {
   source = "../../modules/iam"
 }
 # This module sets up an ECS Fargate service for the voting application.
@@ -45,16 +45,13 @@ module "ecs_fargate" {
   assign_public_ip   = true
   region             = var.aws_region
 
-  //execution_role_arn = var.execution_role_arn
-  //task_role_arn      = var.task_role_arn
+  //ecs_execution_role_arn = modules.iam.aws_iam_role.ecs_execution_role.arn
+  //ecs_task_role_arn      = modules.iam.aws_iam_role.ecs_task_role.arn
+  execution_role_arn     = module.iam.ecs_execution_role_arn
+  task_role_arn          = module.iam.ecs_task_role_arn
 
   target_group_arn   = module.alb.target_group_arn_vote
   subnet_ids = module.network.private_subnet_ids
-
-  execution_role_arn = module.iam_roles.ecs_execution_role_arn
-  task_role_arn      = module.iam_roles.ecs_task_role_arn
-
-
   tags = {
     Environment = var.environment
   }

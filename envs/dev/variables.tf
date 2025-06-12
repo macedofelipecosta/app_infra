@@ -29,8 +29,8 @@ variable "cluster_name" {}
 variable "task_family" {}
 variable "container_name" {}
 
-variable "execution_role_arn" {}
-variable "task_role_arn" {}
+# variable "execution_role_arn" {}
+# variable "task_role_arn" {}
 
-variable "ecs_execution_role_arn" {}
-variable "ecs_task_role_arn" {}
+# variable "ecs_execution_role_arn" {}
+# variable "ecs_task_role_arn" {}

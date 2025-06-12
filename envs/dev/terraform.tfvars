@@ -9,7 +9,17 @@ app_port        = 80
 vote_image_url  = "123456789012.dkr.ecr.us-east-1.amazonaws.com/vote:dev"
 aws_region      = "us-east-1"
 
-//aws_region = "us-east-1"
 
-//ecs_execution_role_arn = "arn:aws:iam::<tu_account_id>:role/ecsTaskExecutionRole"
-//ecs_task_role_arn      = "arn:aws:iam::<tu_account_id>:role/ecsAppTaskRole"
+
+
+#Variables asignadas momentaneamente para pruebas
+cluster_name          = "voting-cluster-dev"
+container_name        = "vote-container"
+task_family            = "voting-task-dev"
+
+
+
+result_image_url       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/result:dev"
+worker_image_url       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/worker:dev"
+
+result_port            = 80
