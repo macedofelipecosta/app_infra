@@ -1,12 +1,17 @@
 
 output "alb_dns_name" {
   description = "DNS del Application Load Balancer"
-  value       = module.alb.lb_dns_name
+  value       = module.alb.alb_dns_name
 }
 
-output "alb_target_group_arn" {
-  description = "ARN del Target Group asociado al ALB"
-  value       = module.alb.target_group_arn
+output "alb_target_group_arn_vote" {
+  description = "ARN del Target Group vote asociado al ALB"
+  value       = module.alb.target_group_arn_vote
+
+}
+output "alb_target_group_arn_result" {
+  description = "ARN del Target Group result asociado al ALB"
+  value       = module.alb.target_group_arn_result
 
 }
 

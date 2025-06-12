@@ -54,13 +54,9 @@ resource "aws_ecs_service" "this" {
     container_port   = var.container_port
   }
 
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
-  }
-
-
+  health_check_grace_period_seconds = 60
+  deployment_minimum_healthy_percent = 100
+  
   depends_on = [aws_ecs_task_definition.this]
   tags       = var.tags
 }

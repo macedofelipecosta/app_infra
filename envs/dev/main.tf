@@ -23,9 +23,13 @@ module "alb" {
   security_group_ids = [module.security_groups.alb_sg_id]
   environment        = var.environment
 
-  target_port        = var.app_port
 
 }
+module "iam_roles" {
+  source = "../../modules/iam"
+}
+# This module sets up an ECS Fargate service for the voting application.
+# It uses the provided IAM roles, network configuration, and ALB setup.
 
 module "ecs_fargate" {
   source             = "../../modules/ecs_fargate"
@@ -37,13 +41,20 @@ module "ecs_fargate" {
   cpu                = "256"
   memory             = "512"
   desired_count      = 1
-  subnet_ids         = module.network.private_subnet_ids
   security_group_ids = [module.security_groups.ecs_sg_id]
   assign_public_ip   = true
   region             = var.aws_region
-  execution_role_arn = var.execution_role_arn
-  task_role_arn      = var.task_role_arn
+
+  //execution_role_arn = var.execution_role_arn
+  //task_role_arn      = var.task_role_arn
+
   target_group_arn   = module.alb.target_group_arn_vote
+  subnet_ids = module.network.private_subnet_ids
+
+  execution_role_arn = module.iam_roles.ecs_execution_role_arn
+  task_role_arn      = module.iam_roles.ecs_task_role_arn
+
+
   tags = {
     Environment = var.environment
   }

@@ -15,5 +15,5 @@ output "task_definition_arn" {
 
 output "service_arn" {
   description = "ARN del servicio ECS"
-  value       = aws_ecs_service.this.arn
+  value       = aws_ecs_service.this.id
 }
