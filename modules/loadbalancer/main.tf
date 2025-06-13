@@ -18,6 +18,7 @@ resource "aws_lb_target_group" "vote" {
   port     = var.target_port_vote
   protocol = "HTTP"
   vpc_id   = var.vpc_id
+  target_type = "ip"
 
   health_check {
     path                = "/"
@@ -40,6 +41,7 @@ resource "aws_lb_target_group" "result" {
   port     = var.target_port_result
   protocol = "HTTP"
   vpc_id   = var.vpc_id
+  target_type = "ip"
 
   health_check {
     path                = "/"

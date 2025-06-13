@@ -25,8 +25,8 @@ module "alb" {
 
 
 }
-module "iam" {
-  source = "../../modules/iam"
+data "aws_iam_role"  "labrole" {
+  name = "LabRole"
 }
 # This module sets up an ECS Fargate service for the voting application.
 # It uses the provided IAM roles, network configuration, and ALB setup.
@@ -47,8 +47,8 @@ module "ecs_fargate" {
 
   //ecs_execution_role_arn = modules.iam.aws_iam_role.ecs_execution_role.arn
   //ecs_task_role_arn      = modules.iam.aws_iam_role.ecs_task_role.arn
-  execution_role_arn     = module.iam.ecs_execution_role_arn
-  task_role_arn          = module.iam.ecs_task_role_arn
+  execution_role_arn     = data.aws_iam_role.labrole.arn
+  task_role_arn          = data.aws_iam_role.labrole.arn
 
   target_group_arn   = module.alb.target_group_arn_vote
   subnet_ids = module.network.private_subnet_ids
