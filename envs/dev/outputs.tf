@@ -15,18 +15,25 @@ output "alb_target_group_arn_result" {
 
 }
 
-output "ecs_service_name" {
-  description = "Nombre del servicio ECS Fargate"
+output "ecs_service_name_vote" {
+  description = "Nombre del servicio ECS Fargate del modulo Vote"
+  value       = module.ecs_vote.ecs_service_name
+}
 
-  value       = module.ecs_fargate.ecs_service_name
+output "ecs_service_name_result" {
+  description = "Nombre del servicio ECS Fargate del modulo Result"
+  value       = module.ecs_result.ecs_service_name
+}
 
+output "ecs_service_name_worker" {
+  description = "Nombre del servicio ECS Fargate del modulo Worker"
+  value       = module.ecs_worker.ecs_service_name
 }
 
 output "ecs_cluster_id" {
   description = "ID del cluster ECS"
-
-  value       = module.ecs_fargate.ecs_cluster_id
-
+  value       = module.ecs_vote.ecs_cluster_id
+  #Se retorna un unico ID de cluster ECS, ya que todos los servicios comparten el mismo cluster
 }
 
 output "vpc_id" {
