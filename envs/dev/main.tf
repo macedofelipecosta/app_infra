@@ -28,34 +28,33 @@ module "alb" {
 data "aws_iam_role"  "labrole" {
   name = "LabRole"
 }
-# This module sets up an ECS Fargate service for the voting application.
-# It uses the provided IAM roles, network configuration, and ALB setup.
+module "ecr_vote" {
+  source           = "../../modules/ecr"
+  repository_name  = "vote"
+  force_delete     = true
+  tags = {
+    Environment = var.environment
+  }
+}
 
-# module "ecs_fargate" {
-#   source             = "../../modules/ecs_fargate"
-#   cluster_name       = var.cluster_name
-#   task_family        = var.task_family
-#   container_name     = var.container_name
-#   container_port     = var.app_port
-#   image              = var.vote_image_url
-#   cpu                = "256"
-#   memory             = "512"
-#   desired_count      = 1
-#   security_group_ids = [module.security_groups.ecs_sg_id]
-#   assign_public_ip   = true
-#   region             = var.aws_region
+module "ecr_result" {
+  source           = "../../modules/ecr"
+  repository_name  = "result"
+  force_delete     = true
+  tags = {
+    Environment = var.environment
+  }
+}
 
-#   //ecs_execution_role_arn = modules.iam.aws_iam_role.ecs_execution_role.arn
-#   //ecs_task_role_arn      = modules.iam.aws_iam_role.ecs_task_role.arn
-#   execution_role_arn     = data.aws_iam_role.labrole.arn
-#   task_role_arn          = data.aws_iam_role.labrole.arn
+module "ecr_worker" {
+  source           = "../../modules/ecr"
+  repository_name  = "worker"
+  force_delete     = true
+  tags = {
+    Environment = var.environment
+  }
+}
 
-#   target_group_arn   = module.alb.target_group_arn_vote
-#   subnet_ids = module.network.private_subnet_ids
-#   tags = {
-#     Environment = var.environment
-#   }
-# }
 
 module "ecs_vote" {
   source             = "../../modules/ecs_fargate"
@@ -74,6 +73,8 @@ module "ecs_vote" {
   execution_role_arn = data.aws_iam_role.labrole.arn
   task_role_arn      = data.aws_iam_role.labrole.arn
   target_group_arn   = module.alb.target_group_arn_vote
+  listener_rule_depends_on = module.alb.listener_rule_vote
+
   tags = {
     Environment = var.environment
   }
@@ -96,13 +97,15 @@ module "ecs_result" {
   execution_role_arn = data.aws_iam_role.labrole.arn
   task_role_arn      = data.aws_iam_role.labrole.arn
   target_group_arn   = module.alb.target_group_arn_result
+  listener_rule_depends_on = module.alb.listener_rule_result
+
   tags = {
     Environment = var.environment
   }
 }
 
 module "ecs_worker" {
-  source             = "../../modules/ecs_fargate"
+  source             = "../../modules/ecs_worker"
   cluster_name       = var.cluster_name
   task_family        = "worker-task"
   container_name     = "worker"
@@ -117,11 +120,11 @@ module "ecs_worker" {
   region             = var.aws_region
   execution_role_arn = data.aws_iam_role.labrole.arn
   task_role_arn      = data.aws_iam_role.labrole.arn
-  target_group_arn = null  # Aquí se pasa `null` porque `worker` no necesita ALB
-  # target_group_arn   = module.alb.target_group_arn_worker  # Si se necesita ALB, descomentar esta línea
+
 
   tags = {
     Environment = var.environment
   }
 }
+
 

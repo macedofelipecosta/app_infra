@@ -71,10 +71,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "target_group_arn" {
-  description = "ARN del target group del load balancer"
-  type        = string
-}
 
 variable "subnet_ids" {
   description = "Lista de IDs de subnets privadas"

@@ -47,13 +47,6 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = var.assign_public_ip
     security_groups  = var.security_group_ids
   }
-
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
-  }
-
   health_check_grace_period_seconds  = 60
   deployment_minimum_healthy_percent = 100
 

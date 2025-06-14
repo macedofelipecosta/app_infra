@@ -30,10 +30,13 @@ output "ecs_service_name_worker" {
   value       = module.ecs_worker.ecs_service_name
 }
 
+
+#Se retorna un unico ID de cluster ECS, ya que todos los servicios comparten el mismo cluster
 output "ecs_cluster_id" {
   description = "ID del cluster ECS"
   value       = module.ecs_vote.ecs_cluster_id
   #Se retorna un unico ID de cluster ECS, ya que todos los servicios comparten el mismo cluster
+
 }
 
 output "vpc_id" {
@@ -46,3 +49,14 @@ output "subnet_ids" {
   value       = module.network.private_subnet_ids
 }
 
+output "ecr_vote_url" {
+  value = module.ecr_vote.repository_url
+}
+
+output "ecr_result_url" {
+  value = module.ecr_result.repository_url
+}
+
+output "ecr_worker_url" {
+  value = module.ecr_worker.repository_url
+}

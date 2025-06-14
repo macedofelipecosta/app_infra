@@ -15,3 +15,10 @@ output "target_group_arn_result" {
   value = aws_lb_target_group.result.arn
 }
 
+output "listener_rule_vote" {
+  value = aws_lb_listener_rule.vote
+}
+
+output "listener_rule_result" {
+  value = aws_lb_listener_rule.result
+}
