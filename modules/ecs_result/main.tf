@@ -1,8 +1,7 @@
-resource "aws_cloudwatch_log_group" "ecs_worker" {
-  name              = "/ecs/worker"
+resource "aws_cloudwatch_log_group" "this" {
+  name              = "/ecs/result"
   retention_in_days = 7
 }
-
 
 resource "aws_ecs_task_definition" "this" {
   family                   = var.task_family
@@ -12,10 +11,6 @@ resource "aws_ecs_task_definition" "this" {
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.task_role_arn
-
-  depends_on = [
-    aws_cloudwatch_log_group.ecs_worker
-  ]
 
   container_definitions = jsonencode([
     {
@@ -31,7 +26,7 @@ resource "aws_ecs_task_definition" "this" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/ecs/${var.container_name}"
+          awslogs-group         = aws_cloudwatch_log_group.this.name
           awslogs-region        = var.region
           awslogs-stream-prefix = "ecs"
         }
@@ -41,7 +36,7 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "${var.container_name}-service"
+  name            = "result-service"
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
@@ -52,13 +47,17 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = var.assign_public_ip
     security_groups  = var.security_group_ids
   }
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = var.container_name
+    container_port   = var.container_port
+  }
+
   health_check_grace_period_seconds  = 60
   deployment_minimum_healthy_percent = 100
 
-  depends_on = [
-    aws_ecs_task_definition.this,
-    var.listener_rule_depends_on
-  ]
-  tags = var.tags
+  depends_on = [aws_ecs_task_definition.this, var.listener_rule_depends_on]
 
+  tags = var.tags
 }

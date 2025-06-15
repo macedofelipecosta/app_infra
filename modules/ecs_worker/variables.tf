@@ -1,7 +1,3 @@
-variable "cluster_name" {
-  description = "Nombre del cluster ECS"
-  type        = string
-}
 
 variable "task_family" {
   description = "Nombre lógico del task definition"
@@ -71,7 +67,6 @@ variable "tags" {
   default     = {}
 }
 
-
 variable "subnet_ids" {
   description = "Lista de IDs de subnets privadas"
   type        = list(string)
@@ -82,3 +77,7 @@ variable "listener_rule_depends_on" {
   default     = null
 }
 
+variable "cluster_id" {
+  description = "ID del cluster ECS"
+  type        = string
+}

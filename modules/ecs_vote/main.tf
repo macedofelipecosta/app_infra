@@ -1,6 +1,6 @@
-resource "aws_ecs_cluster" "this" {
-  name = var.cluster_name
-  tags = var.tags
+resource "aws_cloudwatch_log_group" "this" {
+  name              = "/ecs/vote"
+  retention_in_days = 7
 }
 
 resource "aws_ecs_task_definition" "this" {
@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "this" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/ecs/${var.container_name}"
+          awslogs-group         = aws_cloudwatch_log_group.this.name
           awslogs-region        = var.region
           awslogs-stream-prefix = "ecs"
         }
@@ -36,8 +36,8 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "${var.container_name}-service"
-  cluster         = aws_ecs_cluster.this.id
+  name            = "vote-service"
+  cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
@@ -57,10 +57,7 @@ resource "aws_ecs_service" "this" {
   health_check_grace_period_seconds  = 60
   deployment_minimum_healthy_percent = 100
 
-  depends_on = [
-    aws_ecs_task_definition.this,
-    var.listener_rule_depends_on
-  ]
-  tags = var.tags
+  depends_on = [aws_ecs_task_definition.this, var.listener_rule_depends_on]
 
+  tags = var.tags
 }

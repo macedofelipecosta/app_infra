@@ -34,7 +34,7 @@ output "ecs_service_name_worker" {
 #Se retorna un unico ID de cluster ECS, ya que todos los servicios comparten el mismo cluster
 output "ecs_cluster_id" {
   description = "ID del cluster ECS"
-  value       = module.ecs_vote.ecs_cluster_id
+  value       = module.ecs_cluster.cluster_id
   #Se retorna un unico ID de cluster ECS, ya que todos los servicios comparten el mismo cluster
 
 }
