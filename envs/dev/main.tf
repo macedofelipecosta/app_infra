@@ -159,7 +159,7 @@ module "ecs_worker" {
   cluster_id         = module.ecs_cluster.cluster_id
   task_family        = "worker-task"
   container_name     = "worker"
-  container_port     = 80
+  container_port     = 6379
   image              = var.worker_image_url
   cpu                = "256"
   memory             = "512"
