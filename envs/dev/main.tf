@@ -12,7 +12,7 @@ module "network" {
 }
 
 module "security_groups" {
-  source = "../../modules/security"
+  source      = "../../modules/security"
   vpc_id      = module.network.vpc_id
   environment = var.environment
   app_port    = var.app_port
@@ -91,11 +91,11 @@ module "vote_autoscaling" {
   cluster_name = module.ecs_cluster.cluster_name
 
   # Capacidad (ajustar según entorno)
-  min_capacity = 2    # Mínimo para HA
-  max_capacity = 6    # Máximo para picos de tráfico
+  min_capacity = 2 # Mínimo para HA
+  max_capacity = 6 # Máximo para picos de tráfico
 
   # Métrica basada en CPU (para carga de aplicación)
-  target_value = 60   # 60% de uso de CPU objetivo
+  target_value = 60 # 60% de uso de CPU objetivo
   metric_type  = "ECSServiceAverageCPUUtilization"
 
   # Alternativa métrica basada en requests (si usa ALB):
@@ -103,8 +103,8 @@ module "vote_autoscaling" {
   # metric_type  = "ALBRequestCountPerTarget"
 
   # Cooldowns
-  scale_out_cooldown = 120  # Escalar rápido en picos
-  scale_in_cooldown  = 300  # Reducir más lento para evitar fluctuaciones
+  scale_out_cooldown = 120 # Escalar rápido en picos
+  scale_in_cooldown  = 300 # Reducir más lento para evitar fluctuaciones
 }
 
 module "ecs_result" {
@@ -133,22 +133,22 @@ module "ecs_result" {
 }
 
 module "result_autoscaling" {
- source = "../../modules/autoscaling"
+  source = "../../modules/autoscaling"
 
   service_name = module.ecs_result.ecs_service_name
   cluster_name = module.ecs_cluster.cluster_name
-  
+
   # Configuración de capacidad
   min_capacity = 2
   max_capacity = 4
-  
+
   # Métricas de escalado
-  target_value = 50  # 50% CPU utilización objetivo
-  metric_type  = "ECSServiceAverageCPUUtilization"  # Explícito es mejor
-  
+  target_value = 50                                # 50% CPU utilización objetivo
+  metric_type  = "ECSServiceAverageCPUUtilization" # Explícito es mejor
+
   # Tiempos de cooldown
-  scale_out_cooldown = 120  # 2 minutos para escalar hacia arriba
-  scale_in_cooldown  = 300  # 5 minutos para escalar hacia abajo (más conservador)
+  scale_out_cooldown = 120 # 2 minutos para escalar hacia arriba
+  scale_in_cooldown  = 300 # 5 minutos para escalar hacia abajo (más conservador)
 }
 
 module "ecs_worker" {
@@ -162,7 +162,7 @@ module "ecs_worker" {
   memory             = "512"
   desired_count      = 2
   subnet_ids         = module.network.private_subnet_ids
-  security_group_ids =  [module.security_groups.ecs_worker_sg_id]
+  security_group_ids = [module.security_groups.ecs_worker_sg_id]
   assign_public_ip   = true
   region             = var.aws_region
   execution_role_arn = data.aws_iam_role.labrole.arn
@@ -181,8 +181,8 @@ module "worker_autoscaling" {
   cluster_name = module.ecs_cluster.cluster_name
 
   # Capacidad (workers pueden ser más elásticos)
-  min_capacity = 2    # Puede ser 1 en desarrollo
-  max_capacity = 10   # Escalar agresivamente bajo carga
+  min_capacity = 2  # Puede ser 1 en desarrollo
+  max_capacity = 10 # Escalar agresivamente bajo carga
 
   # Métrica basada en CPU (workers pueden ser intensivos en CPU)
   target_value = 70 # 70% CPU utilización objetivo (workers pueden ser intensivos en CPU)
@@ -190,12 +190,13 @@ module "worker_autoscaling" {
 
   # Cooldowns más largos (workers tardan más en inicializarse)
   scale_out_cooldown = 180
-  scale_in_cooldown  = 600  # 10 minutos para evitar escalado prematuro
+  scale_in_cooldown  = 600 # 10 minutos para evitar escalado prematuro
 }
 
 
 module "redis" {
   source             = "../../modules/redis"
+  region             = var.aws_region
   cluster_id         = module.ecs_cluster.cluster_id
   execution_role_arn = data.aws_iam_role.labrole.arn
   task_role_arn      = data.aws_iam_role.labrole.arn
