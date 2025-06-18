@@ -34,7 +34,7 @@ resource "aws_ecs_task_definition" "this" {
       environment = [
         {
           name  = "REDIS"
-          value = "worker-service.local:6379"
+          value = "redis-service.local:6379"
         }
       ]
     }

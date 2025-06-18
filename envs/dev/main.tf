@@ -24,15 +24,12 @@ module "alb" {
   subnet_ids         = module.network.public_subnet_ids
   security_group_ids = [module.security_groups.alb_sg_id]
   environment        = var.environment
-
-
 }
 module "ecs_cluster" {
   source       = "../../modules/ecs_cluster"
   cluster_name = var.cluster_name
   environment  = var.environment
 }
-
 
 module "ecr_vote" {
   source          = "../../modules/ecr"
@@ -158,14 +155,14 @@ module "ecs_worker" {
   source             = "../../modules/ecs_worker"
   cluster_id         = module.ecs_cluster.cluster_id
   task_family        = "worker-task"
-  container_name     = "worker"
+  container_name     = "redis"
   container_port     = 6379
   image              = var.worker_image_url
   cpu                = "256"
   memory             = "512"
   desired_count      = 2
   subnet_ids         = module.network.private_subnet_ids
-  security_group_ids = [module.security_groups.ecs_sg_id]
+  security_group_ids =  [module.security_groups.ecs_worker_sg_id]
   assign_public_ip   = true
   region             = var.aws_region
   execution_role_arn = data.aws_iam_role.labrole.arn
@@ -187,11 +184,21 @@ module "worker_autoscaling" {
   min_capacity = 2    # Puede ser 1 en desarrollo
   max_capacity = 10   # Escalar agresivamente bajo carga
 
-# Métrica basada en CPU (workers pueden ser intensivos en CPU)
+  # Métrica basada en CPU (workers pueden ser intensivos en CPU)
   target_value = 70 # 70% CPU utilización objetivo (workers pueden ser intensivos en CPU)
   metric_type  = "ECSServiceAverageCPUUtilization"
 
   # Cooldowns más largos (workers tardan más en inicializarse)
   scale_out_cooldown = 180
   scale_in_cooldown  = 600  # 10 minutos para evitar escalado prematuro
+}
+
+
+module "redis" {
+  source             = "../../modules/redis"
+  cluster_id         = module.ecs_cluster.cluster_id
+  execution_role_arn = data.aws_iam_role.labrole.arn
+  task_role_arn      = data.aws_iam_role.labrole.arn
+  subnet_ids         = module.network.private_subnet_ids
+  security_group_ids = [module.security_groups.ecs_worker_sg_id] # uno que permita puerto 6379
 }

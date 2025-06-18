@@ -52,3 +52,27 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
+resource "aws_security_group" "ecs_worker_sg" {
+  name        = "ecs-worker-sg"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "Permitir trafico Redis desde vote y result"
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ecs_sg.id]
+  }
+
+  egress {
+    description = "Permitir todo el trafico saliente desde el Worker"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "ecs-worker-sg"
+  }
+}

@@ -115,7 +115,8 @@ resource "aws_route" "private_nat_access" {
   count = length(var.public_subnets)
   route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.nat[0].id
+  nat_gateway_id = aws_nat_gateway.nat[count.index].id
+  depends_on = [ aws_route_table.private , aws_subnet.public]
 }
 
 #Asocia las subredes privadas a las tablas de ruteo privadas para que puedan acceder a internet a traves del NAT Gateway
@@ -123,4 +124,5 @@ resource "aws_route_table_association" "private" {
   count          = length(var.private_subnets)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
+  depends_on = [ aws_subnet.private  , aws_route_table.private ]
 }
