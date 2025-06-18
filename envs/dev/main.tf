@@ -12,9 +12,7 @@ module "network" {
 }
 
 module "security_groups" {
-
   source = "../../modules/security"
-
   vpc_id      = module.network.vpc_id
   environment = var.environment
   app_port    = var.app_port
@@ -33,7 +31,6 @@ module "ecs_cluster" {
   source       = "../../modules/ecs_cluster"
   cluster_name = var.cluster_name
   environment  = var.environment
-  task_family  = "voting-app"
 }
 
 
@@ -75,7 +72,7 @@ module "ecs_vote" {
   image                    = var.vote_image_url
   cpu                      = "256"
   memory                   = "512"
-  desired_count            = 1
+  desired_count            = 2
   subnet_ids               = module.network.private_subnet_ids
   security_group_ids       = [module.security_groups.ecs_sg_id]
   assign_public_ip         = true
@@ -90,6 +87,29 @@ module "ecs_vote" {
   }
 }
 
+module "vote_autoscaling" {
+  source = "../../modules/autoscaling"
+
+  service_name = module.ecs_vote.ecs_service_name
+  cluster_name = module.ecs_cluster.cluster_name
+
+  # Capacidad (ajustar según entorno)
+  min_capacity = 2    # Mínimo para HA
+  max_capacity = 6    # Máximo para picos de tráfico
+
+  # Métrica basada en CPU (para carga de aplicación)
+  target_value = 60   # 60% de uso de CPU objetivo
+  metric_type  = "ECSServiceAverageCPUUtilization"
+
+  # Alternativa métrica basada en requests (si usa ALB):
+  # target_value = 500  # Requests por target/minuto
+  # metric_type  = "ALBRequestCountPerTarget"
+
+  # Cooldowns
+  scale_out_cooldown = 120  # Escalar rápido en picos
+  scale_in_cooldown  = 300  # Reducir más lento para evitar fluctuaciones
+}
+
 module "ecs_result" {
   source                   = "../../modules/ecs_result"
   cluster_name             = module.ecs_cluster.cluster_name
@@ -100,7 +120,7 @@ module "ecs_result" {
   image                    = var.result_image_url
   cpu                      = "256"
   memory                   = "512"
-  desired_count            = 1
+  desired_count            = 2
   subnet_ids               = module.network.private_subnet_ids
   security_group_ids       = [module.security_groups.ecs_sg_id]
   assign_public_ip         = true
@@ -115,6 +135,25 @@ module "ecs_result" {
   }
 }
 
+module "result_autoscaling" {
+ source = "../../modules/autoscaling"
+
+  service_name = module.ecs_result.ecs_service_name
+  cluster_name = module.ecs_cluster.cluster_name
+  
+  # Configuración de capacidad
+  min_capacity = 2
+  max_capacity = 4
+  
+  # Métricas de escalado
+  target_value = 50  # 50% CPU utilización objetivo
+  metric_type  = "ECSServiceAverageCPUUtilization"  # Explícito es mejor
+  
+  # Tiempos de cooldown
+  scale_out_cooldown = 120  # 2 minutos para escalar hacia arriba
+  scale_in_cooldown  = 300  # 5 minutos para escalar hacia abajo (más conservador)
+}
+
 module "ecs_worker" {
   source             = "../../modules/ecs_worker"
   cluster_id         = module.ecs_cluster.cluster_id
@@ -124,7 +163,7 @@ module "ecs_worker" {
   image              = var.worker_image_url
   cpu                = "256"
   memory             = "512"
-  desired_count      = 1
+  desired_count      = 2
   subnet_ids         = module.network.private_subnet_ids
   security_group_ids = [module.security_groups.ecs_sg_id]
   assign_public_ip   = true
@@ -138,4 +177,21 @@ module "ecs_worker" {
   }
 }
 
+module "worker_autoscaling" {
+  source = "../../modules/autoscaling"
 
+  service_name = module.ecs_worker.ecs_service_name
+  cluster_name = module.ecs_cluster.cluster_name
+
+  # Capacidad (workers pueden ser más elásticos)
+  min_capacity = 2    # Puede ser 1 en desarrollo
+  max_capacity = 10   # Escalar agresivamente bajo carga
+
+# Métrica basada en CPU (workers pueden ser intensivos en CPU)
+  target_value = 70 # 70% CPU utilización objetivo (workers pueden ser intensivos en CPU)
+  metric_type  = "ECSServiceAverageCPUUtilization"
+
+  # Cooldowns más largos (workers tardan más en inicializarse)
+  scale_out_cooldown = 180
+  scale_in_cooldown  = 600  # 10 minutos para evitar escalado prematuro
+}

@@ -4,7 +4,7 @@ resource "aws_security_group" "alb_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow HTTP"
+    description = "Permitir el trafico HTTP entrante al ALB"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -12,7 +12,7 @@ resource "aws_security_group" "alb_sg" {
   }
 
   egress {
-    description = "Allow all outbound"
+    description = "Permitir todo el trafico saliente desde el ALB"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -27,11 +27,11 @@ resource "aws_security_group" "alb_sg" {
 
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.environment}-ecs-sg"
-  description = "Allow traffic from ALB"
+  description = "Permitir el trafico desde el ALB al ECS"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allow HTTP from ALB"
+    description     = "Permitir el trafico desde el ALB al ECS"
     from_port       = var.app_port
     to_port         = var.app_port
     protocol        = "tcp"
@@ -39,7 +39,7 @@ resource "aws_security_group" "ecs_sg" {
   }
 
   egress {
-    description = "Allow all outbound"
+    description = "Permitir todo el trafico saliente desde el ECS"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

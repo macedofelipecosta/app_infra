@@ -31,6 +31,12 @@ resource "aws_ecs_task_definition" "this" {
           awslogs-stream-prefix = "ecs"
         }
       }
+      environment = [
+        {
+          name  = "REDIS"
+          value = "redis:6379"
+        }
+      ]
     }
   ])
 }
@@ -61,3 +67,5 @@ resource "aws_ecs_service" "this" {
 
   tags = var.tags
 }
+
+
